@@ -43,7 +43,7 @@ dependencies {
 	implementation 'javax.validation:validation-api:2.0.1.Final'
 	testImplementation 'org.junit.jupiter:junit-jupiter-api:5.11.0'
 	// https://mvnrepository.com/artifact/org.springframework/spring-test
-	testImplementation 'org.springframework:spring-test:6.1.12'
+	testImplementation 'org.springframework:spring-test'
 
 
 }

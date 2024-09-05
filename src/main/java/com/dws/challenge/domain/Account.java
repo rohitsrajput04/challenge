@@ -12,10 +12,11 @@ import javax.validation.constraints.NotNull;
 @Data
 public class Account {
 
-  @NotNull
-   private final String accountId;
+  @NotEmpty(message = "Account ID cannot be empty.")
+  @NotNull(message = "Account ID cannot be null.")
+  private final String accountId;
 
-  @NotNull
+  @NotNull(message = "Balance cannot be null.")
   @Min(value = 0, message = "Initial balance must be positive.")
   private BigDecimal balance;
 
@@ -28,6 +29,7 @@ public class Account {
   public Account(@JsonProperty("accountId") String accountId,
     @JsonProperty("balance") BigDecimal balance) {
     this.accountId = accountId;
-    this.balance = balance;
+    this.balance = balance != null ? balance : BigDecimal.ZERO;
+
   }
 }

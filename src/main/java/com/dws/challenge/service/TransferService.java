@@ -30,6 +30,7 @@ public class TransferService {
             Account accountFrom = accountsService.getAccount(accountFromId);
             Account accountTo = accountsService.getAccount(accountToId);
 
+
             if (amount == null || amount.compareTo(BigDecimal.ZERO) <= 0) {
                 throw new IllegalArgumentException("Transfer amount must be positive.");
             }
@@ -38,10 +39,11 @@ public class TransferService {
                 throw new IllegalArgumentException("Account not found.");
             }
 
-            if (accountFrom.getBalance().compareTo(amount) < 0) {
+            if (accountFrom.getBalance() == null || accountFrom.getBalance().compareTo(amount) < 0) {
                 throw new InsufficientFundsException("Insufficient funds in account: " + accountFromId);
             }
-           // accountFrom.withdraw(amount);
+
+            // accountFrom.withdraw(amount);
             //accountTo.deposit(amount);
 
             accountFrom.setBalance(accountFrom.getBalance().subtract(amount));

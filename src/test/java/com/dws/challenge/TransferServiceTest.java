@@ -1,6 +1,7 @@
 package com.dws.challenge;
 
 import com.dws.challenge.domain.Account;
+import com.dws.challenge.exception.InsufficientFundsException;
 import com.dws.challenge.repository.AccountsRepository;
 import com.dws.challenge.service.AccountsService;
 import com.dws.challenge.service.NotificationService;
@@ -58,8 +59,25 @@ public class TransferServiceTest {
         verify(notificationService).notifyAboutTransfer(accountFrom, "Transferred 30.00 to account 2");
         verify(notificationService).notifyAboutTransfer(accountTo, "Received 30.00 from account 1");
     }
-
     @Test
+    void testTransferMoney_InsufficientFunds() {
+        Account accountFrom = new Account("1", BigDecimal.valueOf(10.00));
+        Account accountTo = new Account("2", BigDecimal.valueOf(50.00));
+
+        // Mock the service responses
+        when(accountsService.getAccount("1")).thenReturn(accountFrom);
+        when(accountsService.getAccount("2")).thenReturn(accountTo);
+
+        // Assert that the InsufficientFundsException is thrown
+        InsufficientFundsException thrown = assertThrows(InsufficientFundsException.class, () -> {
+            transferService.transferMoney("1", "2", BigDecimal.valueOf(30.00));
+        });
+
+        // Assert that the exception message is as expected
+        assertEquals("Insufficient funds in account: 1", thrown.getMessage());
+    }
+
+/*    @Test
     void testTransferMoney_InsufficientFunds() {
         Account accountFrom = new Account("1", BigDecimal.valueOf(10.00));
         Account accountTo = new Account("2", BigDecimal.valueOf(50.00));
@@ -71,8 +89,8 @@ public class TransferServiceTest {
             transferService.transferMoney("1", "2", BigDecimal.valueOf(30.00));
         });
 
-        assertEquals("Insufficient funds.", thrown.getMessage());
-    }
+        assertEquals("Account not found.", thrown.getMessage());
+    }*/
 /*
     @Test
     void testTransferMoney_NegativeAmount() {

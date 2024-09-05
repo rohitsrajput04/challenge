@@ -1,5 +1,7 @@
 package com.dws.challenge.web;
 
+import com.dws.challenge.domain.Account;
+import com.dws.challenge.service.AccountsService;
 import com.dws.challenge.service.TransferService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -13,6 +15,8 @@ public class TransferController {
 
     private final TransferService transferService;
 
+    private  AccountsService  accountsService;
+
     @Autowired
     public TransferController(TransferService transferService) {
         this.transferService = transferService;
@@ -22,6 +26,7 @@ public class TransferController {
     public ResponseEntity<String> transferMoney(@RequestParam String accountFromId,
                                                 @RequestParam String accountToId,
                                                 @RequestParam BigDecimal amount) {
+
         try {
             transferService.transferMoney(accountFromId, accountToId, amount);
             return ResponseEntity.ok("Transfer successful.");

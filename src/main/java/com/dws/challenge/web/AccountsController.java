@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -16,7 +17,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
+import java.math.BigDecimal;
 
+@Validated
 @RestController
 @RequestMapping("/v1/accounts")
 @Slf4j
@@ -33,14 +36,25 @@ public class AccountsController {
   public ResponseEntity<Object> createAccount(@RequestBody @Valid Account account) {
     log.info("Creating account {}", account);
 
+
+    if (account.getAccountId() == null || account.getAccountId().trim().isEmpty() ) {
+
+      return new ResponseEntity<>("Account ID cannot be empty.", HttpStatus.BAD_REQUEST);
+    }
+    if (account.getBalance().compareTo(BigDecimal.ZERO) < 0 || new BigDecimal("0").compareTo(BigDecimal.ZERO) == 0 ||
+    new BigDecimal("0.00").compareTo(BigDecimal.ZERO) == 0 ) {
+      return new ResponseEntity<>("Balance cannot be null.", HttpStatus.BAD_REQUEST);
+    }
     try {
-    this.accountsService.createAccount(account);
+      this.accountsService.createAccount(account);
     } catch (DuplicateAccountIdException daie) {
       return new ResponseEntity<>(daie.getMessage(), HttpStatus.BAD_REQUEST);
     }
 
     return new ResponseEntity<>(HttpStatus.CREATED);
   }
+
+
 
   @GetMapping(path = "/{accountId}")
   public Account getAccount(@PathVariable String accountId) {

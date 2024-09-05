@@ -1,6 +1,7 @@
 package com.dws.challenge;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.containsString;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -11,6 +12,7 @@ import java.math.BigDecimal;
 
 import com.dws.challenge.domain.Account;
 import com.dws.challenge.service.AccountsService;
+import com.dws.challenge.web.AccountsController;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -20,6 +22,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
 @ExtendWith(SpringExtension.class)
@@ -70,8 +73,11 @@ class AccountsControllerTest {
 
   @Test
   void createAccountNoBalance() throws Exception {
-    this.mockMvc.perform(post("/v1/accounts").contentType(MediaType.APPLICATION_JSON)
-      .content("{\"accountId\":\"Id-123\"}")).andExpect(status().isBadRequest());
+    this.mockMvc.perform(post("/v1/accounts")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content("{\"accountId\":\"Id-123\"}"))  // Missing balance field
+            .andExpect(status().isBadRequest())
+            .andExpect(content().string(containsString("Balance cannot be null.")));  // Validate error message
   }
 
   @Test
