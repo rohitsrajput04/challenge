@@ -5,9 +5,10 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.math.BigDecimal;
 import lombok.Data;
 
-import javax.validation.constraints.Min;
+import javax.validation.constraints.DecimalMin;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.PositiveOrZero;
 
 @Data
 public class Account {
@@ -17,7 +18,8 @@ public class Account {
   private final String accountId;
 
   @NotNull(message = "Balance cannot be null.")
-  @Min(value = 0, message = "Initial balance must be positive.")
+  @PositiveOrZero(message = "Balance must be zero or positive")
+ // @DecimalMin(value = "0.0", inclusive = false, message = "Balance must be positive.")
   private BigDecimal balance;
 
   public Account(String accountId) {

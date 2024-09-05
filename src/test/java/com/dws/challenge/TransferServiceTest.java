@@ -14,28 +14,30 @@ import org.mockito.MockitoAnnotations;
 
 import java.math.BigDecimal;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 public class TransferServiceTest {
 
-    @Mock
-    private AccountsRepository accountsRepository;
+ //   @Mock
+  //  private AccountsRepository accountsRepository;
 
     @Mock
     private NotificationService notificationService;
 
+   // @InjectMocks
+    //private TransferService transferService;
+
+    @Mock
+  private AccountsService accountsService;
+
     @InjectMocks
     private TransferService transferService;
-    @Mock
-    private AccountsService accountsService;
-
 
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-        assertNotNull(accountsService, "accountsService should not be null");
-        assertNotNull(notificationService, "notificationService should not be null");
     }
 
 /*
@@ -49,15 +51,19 @@ public class TransferServiceTest {
         Account accountFrom = new Account("1", BigDecimal.valueOf(100.00));
         Account accountTo = new Account("2", BigDecimal.valueOf(50.00));
 
-        when(accountsRepository.getAccount("1")).thenReturn(accountFrom);
-        when(accountsRepository.getAccount("2")).thenReturn(accountTo);
+        when(accountsService.getAccount("1")).thenReturn(accountFrom);
+        when(accountsService.getAccount("2")).thenReturn(accountTo);
 
         transferService.transferMoney("1", "2", BigDecimal.valueOf(30.00));
 
-        verify(accountsRepository).createAccount(accountFrom);
-        verify(accountsRepository).createAccount(accountTo);
+        // Verify that the balances have been updated correctly
+        assertThat(accountFrom.getBalance()).isEqualByComparingTo(BigDecimal.valueOf(70.00));
+        assertThat(accountTo.getBalance()).isEqualByComparingTo(BigDecimal.valueOf(80.00));
+
+        // Verify that notifications were sent with correct formatting
         verify(notificationService).notifyAboutTransfer(accountFrom, "Transferred 30.00 to account 2");
         verify(notificationService).notifyAboutTransfer(accountTo, "Received 30.00 from account 1");
+
     }
     @Test
     void testTransferMoney_InsufficientFunds() {

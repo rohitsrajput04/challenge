@@ -12,13 +12,14 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 @ControllerAdvice
     public class GlobalExceptionHandler {
 
-     @ExceptionHandler(MethodArgumentNotValidException.class)
-        public ResponseEntity<Object> handleValidationExceptions(MethodArgumentNotValidException ex) {
-            String errorMessage = ex.getBindingResult().getAllErrors().stream()
-                    .map(DefaultMessageSourceResolvable::getDefaultMessage)
-                    .collect(Collectors.joining(", "));
-            return new ResponseEntity<>(errorMessage, HttpStatus.BAD_REQUEST);
-        }
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<String> handleValidationExceptions(MethodArgumentNotValidException ex) {
+        StringBuilder errors = new StringBuilder();
+        ex.getBindingResult().getAllErrors().forEach(error -> {
+            errors.append(error.getDefaultMessage()).append("\n");
+        });
+        return ResponseEntity.badRequest().body(errors.toString());
+    }
     }
 
 

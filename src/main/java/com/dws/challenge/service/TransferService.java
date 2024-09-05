@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import lombok.extern.slf4j.Slf4j;
 
 import java.math.BigDecimal;
+import java.text.DecimalFormat;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -26,8 +27,12 @@ public class TransferService {
 
     public void transferMoney(String accountFromId, String accountToId, BigDecimal amount) {
         lock.lock();
-        try {
+        DecimalFormat df = new DecimalFormat("0.00");
+
+        try {            log.info("inside try ",accountFromId);
+
             Account accountFrom = accountsService.getAccount(accountFromId);
+            log.info("inside transferService ",accountFrom,accountToId);
             Account accountTo = accountsService.getAccount(accountToId);
 
 
@@ -43,7 +48,6 @@ public class TransferService {
                 throw new InsufficientFundsException("Insufficient funds in account: " + accountFromId);
             }
 
-            // accountFrom.withdraw(amount);
             //accountTo.deposit(amount);
 
             accountFrom.setBalance(accountFrom.getBalance().subtract(amount));
@@ -53,8 +57,8 @@ public class TransferService {
             accountsService.createAccount(accountTo);
 
 
-            notificationService.notifyAboutTransfer(accountFrom, "Transferred " + amount + " to account " + accountToId);
-            notificationService.notifyAboutTransfer(accountTo, "Received " + amount + " from account " + accountFromId);
+            notificationService.notifyAboutTransfer(accountFrom, "Transferred " + df.format(amount) + " to account " + accountToId);
+            notificationService.notifyAboutTransfer(accountTo, "Received " + df.format(amount) + " from account " + accountFromId);
         } finally {
             lock.unlock();
         }

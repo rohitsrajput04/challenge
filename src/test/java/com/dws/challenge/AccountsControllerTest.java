@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
@@ -48,12 +49,19 @@ class AccountsControllerTest {
 
   @Test
   void createAccount() throws Exception {
-    this.mockMvc.perform(post("/v1/accounts").contentType(MediaType.APPLICATION_JSON)
-      .content("{\"accountId\":\"Id-123\",\"balance\":1000}")).andExpect(status().isCreated());
+    this.mockMvc.perform(post("/v1/accounts")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content("{\"accountId\":\"Id-123\",\"balance\":\"1000\"}"))  // JSON expects balance as a string for BigDecimal
+            .andExpect(status().isCreated());
 
+    // Retrieve the account from the service
     Account account = accountsService.getAccount("Id-123");
+
+    // Assert the account details
+    assertThat(account).isNotNull();
     assertThat(account.getAccountId()).isEqualTo("Id-123");
-    assertThat(account.getBalance()).isEqualByComparingTo("1000");
+    assertThat(account.getBalance()).isEqualByComparingTo(BigDecimal.valueOf(1000));
+
   }
 
   @Test
