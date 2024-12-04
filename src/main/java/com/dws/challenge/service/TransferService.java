@@ -24,17 +24,18 @@ public class TransferService {
         this.accountsService = accountsService;
         this.notificationService = notificationService;
     }
-
     public void transferMoney(String accountFromId, String accountToId, BigDecimal amount) {
         lock.lock();
         DecimalFormat df = new DecimalFormat("0.00");
 
-        try {            log.info("inside try ",accountFromId);
+        try {
+            log.info("Start transfer: From Account ID: {}, To Account ID: {}, Amount: {}", accountFromId, accountToId, amount);
 
             Account accountFrom = accountsService.getAccount(accountFromId);
-            log.info("inside transferService ",accountFrom,accountToId);
-            Account accountTo = accountsService.getAccount(accountToId);
+            log.info("Account 'from' retrieved: {}", accountFrom);
 
+            Account accountTo = accountsService.getAccount(accountToId);
+            log.info("Account 'to' retrieved: {}", accountTo);
 
             if (amount == null || amount.compareTo(BigDecimal.ZERO) <= 0) {
                 throw new IllegalArgumentException("Transfer amount must be positive.");
@@ -48,19 +49,25 @@ public class TransferService {
                 throw new InsufficientFundsException("Insufficient funds in account: " + accountFromId);
             }
 
-            //accountTo.deposit(amount);
+            log.info("Processing transfer: {} from {} to {}", df.format(amount), accountFromId, accountToId);
 
             accountFrom.setBalance(accountFrom.getBalance().subtract(amount));
             accountTo.setBalance(accountTo.getBalance().add(amount));
 
-            accountsService.createAccount(accountFrom);  // Update accounts
-            accountsService.createAccount(accountTo);
+            log.info("Updated balances: Account 'from': {}, Account 'to': {}", accountFrom.getBalance(), accountTo.getBalance());
 
+            // Instead of createAccount(), use updateAccount()
+            accountsService.updateAccount(accountFrom);  // Update the 'from' account
+            accountsService.updateAccount(accountTo);    // Update the 'to' account
 
             notificationService.notifyAboutTransfer(accountFrom, "Transferred " + df.format(amount) + " to account " + accountToId);
             notificationService.notifyAboutTransfer(accountTo, "Received " + df.format(amount) + " from account " + accountFromId);
+        } catch (Exception e) {
+            log.error("Error occurred during transfer: {}", e.getMessage(), e);
+            throw new RuntimeException("Transfer failed: " + e.getMessage(), e); // Re-throw or handle as appropriate
         } finally {
             lock.unlock();
         }
     }
+
 }

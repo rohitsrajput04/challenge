@@ -42,9 +42,17 @@ public class AccountsController {
       return new ResponseEntity<>("Account ID cannot be empty.", HttpStatus.BAD_REQUEST);
     }
 
-    if (account.getBalance() == null || account.getBalance().compareTo(BigDecimal.ZERO) <= 0) {
+    if (account.getBalance() == null) {
 
       return new ResponseEntity<>("Balance cannot be null.", HttpStatus.BAD_REQUEST);
+    }
+    if (account.getBalance().toString().trim().isEmpty()) {
+      return new ResponseEntity<>("Balance cannot be empty.", HttpStatus.BAD_REQUEST);
+    }
+
+    if (account.getBalance().compareTo(BigDecimal.ZERO) < 0) {
+
+      return new ResponseEntity<>("Balance cannot be negative.", HttpStatus.BAD_REQUEST);
     }
     try {
       this.accountsService.createAccount(account);
@@ -56,11 +64,23 @@ public class AccountsController {
   }
 
 
+    @GetMapping(path = "/{accountId}")
+    public ResponseEntity<Account> getAccount(@PathVariable String accountId) {
+      log.info("Retrieving account for id {}", accountId);
 
+      Account account = accountsService.getAccount(accountId);
+      if (account == null) {
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+      }
+
+      return new ResponseEntity<>(account, HttpStatus.OK);
+    }
+  }
+
+/*
   @GetMapping(path = "/{accountId}")
   public Account getAccount(@PathVariable String accountId) {
     log.info("Retrieving account for id {}", accountId);
     return this.accountsService.getAccount(accountId);
-  }
+  }*/
 
-}
