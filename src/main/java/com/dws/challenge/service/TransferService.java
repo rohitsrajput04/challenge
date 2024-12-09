@@ -56,15 +56,14 @@ public class TransferService {
 
             log.info("Updated balances: Account 'from': {}, Account 'to': {}", accountFrom.getBalance(), accountTo.getBalance());
 
-            // Instead of createAccount(), use updateAccount()
-            accountsService.updateAccount(accountFrom);  // Update the 'from' account
-            accountsService.updateAccount(accountTo);    // Update the 'to' account
+            accountsService.updateAccount(accountFrom);
+            accountsService.updateAccount(accountTo);
 
             notificationService.notifyAboutTransfer(accountFrom, "Transferred " + df.format(amount) + " to account " + accountToId);
             notificationService.notifyAboutTransfer(accountTo, "Received " + df.format(amount) + " from account " + accountFromId);
         } catch (Exception e) {
             log.error("Error occurred during transfer: {}", e.getMessage(), e);
-            throw new RuntimeException("Transfer failed: " + e.getMessage(), e); // Re-throw or handle as appropriate
+            throw e;
         } finally {
             lock.unlock();
         }

@@ -41,6 +41,9 @@ public class AccountsController {
 
       return new ResponseEntity<>("Account ID cannot be empty.", HttpStatus.BAD_REQUEST);
     }
+    if (account.getBalance().compareTo(BigDecimal.ZERO) == 0) {
+      return new ResponseEntity<>("Balance cannot be zero.", HttpStatus.BAD_REQUEST);
+    }
 
     if (account.getBalance() == null) {
 

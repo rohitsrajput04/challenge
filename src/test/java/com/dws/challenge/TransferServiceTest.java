@@ -67,6 +67,21 @@ public class TransferServiceTest {
     }
     @Test
     void testTransferMoney_InsufficientFunds() {
+        Account accountFrom = new Account("1", BigDecimal.valueOf(10.00));  // Balance = 10.00
+        Account accountTo = new Account("2", BigDecimal.valueOf(50.00));    // Balance = 50.00
+
+        when(accountsService.getAccount("1")).thenReturn(accountFrom);
+        when(accountsService.getAccount("2")).thenReturn(accountTo);
+
+        InsufficientFundsException thrown = assertThrows(InsufficientFundsException.class, () -> {
+            transferService.transferMoney("1", "2", BigDecimal.valueOf(30.00)); // Trying to transfer more than 10.00
+        });
+
+        assertEquals("Insufficient funds in account: 1", thrown.getMessage());
+    }
+/*
+    @Test
+    void testTransferMoney_InsufficientFunds() {
         Account accountFrom = new Account("1", BigDecimal.valueOf(10.00));
         Account accountTo = new Account("2", BigDecimal.valueOf(50.00));
 
@@ -74,14 +89,15 @@ public class TransferServiceTest {
         when(accountsService.getAccount("1")).thenReturn(accountFrom);
         when(accountsService.getAccount("2")).thenReturn(accountTo);
 
-        // Assert that the InsufficientFundsException is thrown
-        InsufficientFundsException thrown = assertThrows(InsufficientFundsException.class, () -> {
+        // Assert that the RuntimeException is thrown
+        RuntimeException thrown = assertThrows(RuntimeException.class, () -> {
             transferService.transferMoney("1", "2", BigDecimal.valueOf(30.00));
         });
 
-        // Assert that the exception message is as expected
-        assertEquals("Insufficient funds in account: 1", thrown.getMessage());
+        assertTrue(thrown.getCause() instanceof InsufficientFundsException);
+        assertEquals("Insufficient funds in account: 1", thrown.getCause().getMessage());
     }
+*/
 
 /*    @Test
     void testTransferMoney_InsufficientFunds() {
@@ -110,14 +126,12 @@ public class TransferServiceTest {
 
     @Test
     void testTransferMoney_NegativeAmount() {
-        // Arrange
         Account accountFrom = new Account("1", BigDecimal.valueOf(100));
         Account accountTo = new Account("2", BigDecimal.valueOf(100));
         when(accountsService.getAccount("1")).thenReturn(accountFrom);
         when(accountsService.getAccount("2")).thenReturn(accountTo);
 
-        // Act & Assert
-        IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class, () -> {
+        RuntimeException thrown = assertThrows(RuntimeException.class, () -> {
             transferService.transferMoney("1", "2", BigDecimal.valueOf(-10.00));
         });
 

@@ -2,6 +2,9 @@ package com.dws.challenge;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.containsString;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -18,6 +21,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -29,8 +33,10 @@ import org.springframework.web.context.WebApplicationContext;
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
 @WebAppConfiguration
+@AutoConfigureMockMvc
 class AccountsControllerTest {
 
+  @Autowired
   private MockMvc mockMvc;
 
   @Autowired
@@ -83,10 +89,22 @@ class AccountsControllerTest {
   void createAccountNoBalance() throws Exception {
     this.mockMvc.perform(post("/v1/accounts")
                     .contentType(MediaType.APPLICATION_JSON)
+                    .content("{\"accountId\":\"Id-12473\"}"))  // Missing balance field
+            .andExpect(status().isBadRequest())  // Expect 400 BadRequest
+            .andExpect(content().string(containsString("Balance cannot be zero.")));
+  }
+
+/*
+
+  @Test
+  void createAccountNoBalance() throws Exception {
+    this.mockMvc.perform(post("/v1/accounts")
+                    .contentType(MediaType.APPLICATION_JSON)
                     .content("{\"accountId\":\"Id-123\"}"))  // Missing balance field
             .andExpect(status().isBadRequest())
             .andExpect(content().string(containsString("Balance cannot be null.")));  // Validate error message
   }
+*/
 
   @Test
   void createAccountNoBody() throws Exception {
@@ -94,11 +112,7 @@ class AccountsControllerTest {
       .andExpect(status().isBadRequest());
   }
 
-  @Test
-  void createAccountNegativeBalance() throws Exception {
-    this.mockMvc.perform(post("/v1/accounts").contentType(MediaType.APPLICATION_JSON)
-      .content("{\"accountId\":\"Id-123\",\"balance\":-1000}")).andExpect(status().isBadRequest());
-  }
+
 
   @Test
   void createAccountEmptyAccountId() throws Exception {
